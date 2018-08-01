@@ -1,0 +1,42 @@
+import functools
+
+df = pd.DataFrame({'From_To': ['LoNDon_paris', 'MAdrid_miLAN', 'londON_StockhOlm',
+'Budapest_PaRis', 'Brussels_londOn'],
+'FlightNumber': [10045, np.nan, 10065, np.nan, 10085],
+'RecentDelays': [[23, 47], [], [24, 43, 87], [13], [67, 32]],
+'Airline': ['KLM(!)', '<Air France> (12)', '(British Airways. )',
+'12. Air France', '"Swiss Air"']})
+
+#Part 1
+df.FlightNumber.fillna(df.FlightNumber.ffill()+10, inplace = True)
+df.FlightNumber = df.FlightNumber.astype(int)
+
+#Part 2 and 3
+df['From'] = (df.From_To.str.split('_').str[0]).str.title()
+df['To'] = (df.From_To.str.split('_').str[1]).str.title()
+
+#Part 4
+df = df.drop(['From_To'], axis=1)
+
+#Part 5
+#Find the max len of sub list
+ls = df.RecentDelays.tolist()
+mx = max(len(lst) for lst in ls)
+
+#Create the header based on mx
+dl = []
+for dly in range(mx):
+    dl.append('Delay'+str(dly+1))
+
+#insert the 'Nan' for missing data
+for row in range(len(ls)):
+    for col in range(mx-len(ls[row])):
+        ls[row].append('NaN')
+
+#Convert List to DF
+df_tmp = pd.DataFrame(ls, columns=dl)
+#Concatinate the DFs on axis 1
+res = pd.concat([df,df_tmp], axis=1)
+#Drop the 'RecentDelays' Column
+res = res.drop(['RecentDelays'], axis=1)
+res
